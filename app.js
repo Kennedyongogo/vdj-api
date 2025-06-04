@@ -26,15 +26,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import routes
-const userRoutes = require("./src/routes/userRoutes");
+
 const adminRoutes = require("./src/routes/adminRoutes");
-const newsRoutes = require("./src/routes/newsRoutes");
+
 
 // Use routes
-app.use("/api/users", userRoutes);
+
 app.use("/api/admin", adminRoutes);
-app.use("/api/news", newsRoutes);
-app.use("/api/admin", adminRoutes);
+
 
 // 404 Route handler
 app.use((req, res) => {

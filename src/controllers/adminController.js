@@ -9,20 +9,14 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Predefined admin credentials for two admins
 const DEFAULT_ADMINS = [
   {
-    username: "GMajiwa",
-    email: "magiwagreevyne@gmail.com",
-    password: "MJArip@2025", // This will be hashed when server starts
-    phoneNumber: "+254798231083",
-    latitude: -1.29883,
-    longitude: 36.81606,
+    username: "VDJkush",
+    email: "hockinsrobin@gmail.com",
+    password: "VDJkush@2025", // This will be hashed when server starts
   },
   {
     username: "Kennedy Oduor",
     email: "ongogokennedy89@gmail.com",
     password: "*Carlmart2025", // This will be hashed when server starts
-    phoneNumber: "+254798757460",
-    latitude: -1.29883,
-    longitude: 36.81606,
   },
 ];
 

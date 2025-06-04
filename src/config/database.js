@@ -2,7 +2,7 @@ const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
 const sequelize = new Sequelize(
-  process.env.POSTGRES_DB || "Arip_db",
+  process.env.POSTGRES_DB || "vdj_db",
   process.env.POSTGRES_USER || "postgres",
   process.env.POSTGRES_PASSWORD || "Training@2025",
   {
