@@ -7,10 +7,10 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://38.242.243.113:4036",
+      "http://38.242.243.113:5036",
       "http://localhost:3000",
       "http://localhost:3001",
-      "http://38.242.243.113:4037",
+      "http://38.242.243.113:5037",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
