@@ -1,7 +1,21 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
+const mixRoutes = require("./src/routes/mixRoutes");
+const eventRoutes = require("./src/routes/eventRoutes");
+const trendingRoutes = require("./src/routes/trendingRoutes");
+const defineAssociations = require("./src/models/associations");
 const app = express();
+
+// Initialize model associations
+defineAssociations();
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
 
 // CORS configuration
 app.use(
@@ -26,14 +40,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import routes
-
 const adminRoutes = require("./src/routes/adminRoutes");
 
-
 // Use routes
-
 app.use("/api/admin", adminRoutes);
-
+app.use("/api/mix", mixRoutes);
+app.use("/api/event", eventRoutes);
+app.use("/api/trending", trendingRoutes);
 
 // 404 Route handler
 app.use((req, res) => {
