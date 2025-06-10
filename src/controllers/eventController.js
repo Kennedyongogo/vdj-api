@@ -353,6 +353,180 @@ const eventController = {
       });
     }
   },
+
+  // Get event statistics for charts and diagrams
+  getEventStats: async (req, res) => {
+    try {
+      const events = await Event.findAll();
+
+      // Calculate statistics
+      const stats = {
+        // Status distribution (for pie chart)
+        statusDistribution: {
+          draft: 0,
+          published: 0,
+          cancelled: 0,
+          completed: 0,
+        },
+
+        // Events by month and year (for bar chart)
+        eventsByMonth: {},
+
+        // Events by venue (for bar chart)
+        eventsByVenue: {},
+
+        // Average ticket price by status
+        avgTicketPriceByStatus: {
+          draft: 0,
+          published: 0,
+          cancelled: 0,
+          completed: 0,
+        },
+
+        // Total events count
+        totalEvents: events.length,
+
+        // Public vs Private events (for pie chart)
+        publicPrivateDistribution: {
+          public: 0,
+          private: 0,
+        },
+
+        // Available years and months for filtering
+        availableYears: new Set(),
+        availableMonths: new Set(),
+      };
+
+      // Process each event
+      events.forEach((event) => {
+        // Count status distribution
+        stats.statusDistribution[event.status]++;
+
+        // Count public vs private
+        if (
+          event.isPublic &&
+          (event.status === "published" || event.status === "completed")
+        ) {
+          stats.publicPrivateDistribution.public++;
+        } else {
+          stats.publicPrivateDistribution.private++;
+        }
+
+        // Count events by month and year
+        const date = new Date(event.startDate);
+        const year = date.getFullYear();
+        const month = date.toLocaleString("default", { month: "long" });
+
+        // Add to available years and months
+        stats.availableYears.add(year);
+        stats.availableMonths.add(month);
+
+        // Create a key that includes both year and month
+        const yearMonthKey = `${year}-${month}`;
+        stats.eventsByMonth[yearMonthKey] =
+          (stats.eventsByMonth[yearMonthKey] || 0) + 1;
+
+        // Count events by venue
+        stats.eventsByVenue[event.venue] =
+          (stats.eventsByVenue[event.venue] || 0) + 1;
+
+        // Calculate average ticket price by status
+        if (event.ticketPrice) {
+          stats.avgTicketPriceByStatus[event.status] += parseFloat(
+            event.ticketPrice
+          );
+        }
+      });
+
+      // Convert Sets to sorted arrays
+      stats.availableYears = Array.from(stats.availableYears).sort();
+      stats.availableMonths = Array.from(stats.availableMonths).sort((a, b) => {
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        return months.indexOf(a) - months.indexOf(b);
+      });
+
+      // Calculate final averages for ticket prices
+      Object.keys(stats.avgTicketPriceByStatus).forEach((status) => {
+        const count = stats.statusDistribution[status];
+        if (count > 0) {
+          stats.avgTicketPriceByStatus[status] = (
+            stats.avgTicketPriceByStatus[status] / count
+          ).toFixed(2);
+        }
+      });
+
+      // Format data for charts
+      const chartData = {
+        statusPieChart: Object.entries(stats.statusDistribution).map(
+          ([status, count]) => ({
+            label: status.charAt(0).toUpperCase() + status.slice(1),
+            value: count,
+          })
+        ),
+
+        monthlyBarChart: Object.entries(stats.eventsByMonth).map(
+          ([yearMonth, count]) => {
+            const [year, month] = yearMonth.split("-");
+            return {
+              label: `${month} ${year}`,
+              value: count,
+              year,
+              month,
+            };
+          }
+        ),
+
+        venueBarChart: Object.entries(stats.eventsByVenue).map(
+          ([venue, count]) => ({
+            label: venue,
+            value: count,
+          })
+        ),
+
+        publicPrivatePieChart: Object.entries(
+          stats.publicPrivateDistribution
+        ).map(([type, count]) => ({
+          label: type.charAt(0).toUpperCase() + type.slice(1),
+          value: count,
+        })),
+
+        ticketPriceBarChart: Object.entries(stats.avgTicketPriceByStatus).map(
+          ([status, price]) => ({
+            label: status.charAt(0).toUpperCase() + status.slice(1),
+            value: parseFloat(price),
+          })
+        ),
+      };
+
+      res.status(200).json({
+        success: true,
+        data: {
+          rawStats: stats,
+          chartData: chartData,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching event statistics:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching event statistics",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = eventController;

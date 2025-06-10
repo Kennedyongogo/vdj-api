@@ -334,6 +334,198 @@ const mixController = {
       });
     }
   },
+
+  // Get mix statistics for charts and diagrams
+  getMixStats: async (req, res) => {
+    try {
+      const mixes = await Mix.findAll();
+
+      // Calculate statistics
+      const stats = {
+        // File type distribution (for pie chart)
+        fileTypeDistribution: {
+          audio: 0,
+          video: 0,
+          mp4: 0,
+        },
+
+        // Public vs Private distribution (for pie chart)
+        publicPrivateDistribution: {
+          public: 0,
+          private: 0,
+        },
+
+        // Mixes by month and year (for bar chart)
+        mixesByMonth: {},
+
+        // Most downloaded mixes (for bar chart)
+        mostDownloadedMixes: [],
+
+        // Most played mixes (for bar chart)
+        mostPlayedMixes: [],
+
+        // Average file size by type
+        avgFileSizeByType: {
+          audio: 0,
+          video: 0,
+          mp4: 0,
+        },
+
+        // Total storage used
+        totalStorageUsed: 0,
+
+        // Total mixes count
+        totalMixes: mixes.length,
+
+        // Available years and months for filtering
+        availableYears: new Set(),
+        availableMonths: new Set(),
+      };
+
+      // Process each mix
+      mixes.forEach((mix) => {
+        // Count file type distribution
+        stats.fileTypeDistribution[mix.fileType]++;
+
+        // Count public vs private
+        if (mix.isPublic) {
+          stats.publicPrivateDistribution.public++;
+        } else {
+          stats.publicPrivateDistribution.private++;
+        }
+
+        // Count mixes by month and year
+        const date = new Date(mix.createdAt);
+        const year = date.getFullYear();
+        const month = date.toLocaleString("default", { month: "long" });
+
+        // Add to available years and months
+        stats.availableYears.add(year);
+        stats.availableMonths.add(month);
+
+        // Create a key that includes both year and month
+        const yearMonthKey = `${year}-${month}`;
+        stats.mixesByMonth[yearMonthKey] =
+          (stats.mixesByMonth[yearMonthKey] || 0) + 1;
+
+        // Add to most downloaded and played mixes
+        stats.mostDownloadedMixes.push({
+          title: mix.title,
+          downloadCount: mix.downloadCount,
+        });
+
+        stats.mostPlayedMixes.push({
+          title: mix.title,
+          playCount: mix.playCount,
+        });
+
+        // Calculate average file size by type
+        if (mix.size) {
+          stats.avgFileSizeByType[mix.fileType] += mix.size;
+          stats.totalStorageUsed += mix.size;
+        }
+      });
+
+      // Convert Sets to sorted arrays
+      stats.availableYears = Array.from(stats.availableYears).sort();
+      stats.availableMonths = Array.from(stats.availableMonths).sort((a, b) => {
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        return months.indexOf(a) - months.indexOf(b);
+      });
+
+      // Sort and limit most downloaded and played mixes
+      stats.mostDownloadedMixes
+        .sort((a, b) => b.downloadCount - a.downloadCount)
+        .slice(0, 10);
+      stats.mostPlayedMixes
+        .sort((a, b) => b.playCount - a.playCount)
+        .slice(0, 10);
+
+      // Calculate final averages for file sizes
+      Object.keys(stats.avgFileSizeByType).forEach((type) => {
+        const count = stats.fileTypeDistribution[type];
+        if (count > 0) {
+          stats.avgFileSizeByType[type] = (
+            stats.avgFileSizeByType[type] / count
+          ).toFixed(2);
+        }
+      });
+
+      // Format data for charts
+      const chartData = {
+        fileTypePieChart: Object.entries(stats.fileTypeDistribution).map(
+          ([type, count]) => ({
+            label: type.charAt(0).toUpperCase() + type.slice(1),
+            value: count,
+          })
+        ),
+
+        publicPrivatePieChart: Object.entries(
+          stats.publicPrivateDistribution
+        ).map(([type, count]) => ({
+          label: type.charAt(0).toUpperCase() + type.slice(1),
+          value: count,
+        })),
+
+        monthlyBarChart: Object.entries(stats.mixesByMonth).map(
+          ([yearMonth, count]) => {
+            const [year, month] = yearMonth.split("-");
+            return {
+              label: `${month} ${year}`,
+              value: count,
+              year,
+              month,
+            };
+          }
+        ),
+
+        downloadedMixesBarChart: stats.mostDownloadedMixes.map((mix) => ({
+          label: mix.title,
+          value: mix.downloadCount,
+        })),
+
+        playedMixesBarChart: stats.mostPlayedMixes.map((mix) => ({
+          label: mix.title,
+          value: mix.playCount,
+        })),
+
+        fileSizeBarChart: Object.entries(stats.avgFileSizeByType).map(
+          ([type, size]) => ({
+            label: type.charAt(0).toUpperCase() + type.slice(1),
+            value: parseFloat(size),
+          })
+        ),
+      };
+
+      res.status(200).json({
+        success: true,
+        data: {
+          rawStats: stats,
+          chartData: chartData,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching mix statistics:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching mix statistics",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = mixController;

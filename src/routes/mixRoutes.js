@@ -8,6 +8,7 @@ const upload = require("../middleware/uploadMiddleware");
 router.get("/", mixController.getAllMixes); // Get all mixes
 router.get("/:id", mixController.getMixById); // Get mix by ID
 router.get("/dj/:djId", mixController.getMixesByDJ); // Get mixes by DJ
+router.get("/stats/charts", mixController.getMixStats); // Get mix statistics for charts
 router.post("/:id/download", mixController.incrementDownloadCount); // Track download
 router.get("/:id/download-file", mixController.downloadMix); // Download mix file
 

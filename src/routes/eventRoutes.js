@@ -9,6 +9,7 @@ router.get("/", eventController.getAllEvents); // Get all events
 router.get("/public", eventController.getPublicEvents); // Get only published and completed events
 router.get("/:id", eventController.getEventById); // Get event by ID
 router.get("/dj/:djId", eventController.getEventsByDJ); // Get events by DJ
+router.get("/stats/charts", eventController.getEventStats); // Get event statistics for charts
 
 // Protected routes (require admin authentication)
 router.post(
