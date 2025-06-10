@@ -8,4 +8,7 @@ router.post("/login", adminController.login);
 // Get all admins route
 router.get("/", adminController.getAllAdmins);
 
+// Get admin by ID route
+router.get("/:id", adminController.getAdminById);
+
 module.exports = router;

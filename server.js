@@ -4,8 +4,12 @@ const http = require("http");
 const app = require("./app");
 const sequelize = require("./src/config/database");
 const adminController = require("./src/controllers/adminController");
+const setupWebSocketServer = require("./src/websocket/chatServer");
 
 const server = http.createServer(app);
+
+// Setup WebSocket server
+setupWebSocketServer(server);
 
 const PORT = process.env.PORT || 3003;
 

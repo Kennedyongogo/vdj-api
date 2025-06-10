@@ -155,6 +155,37 @@ const adminController = {
       });
     }
   },
+
+  // Get admin by ID
+  getAdminById: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const admin = await Admin.findOne({
+        where: { id },
+        attributes: { exclude: ["password"] }, // Exclude password from results
+      });
+
+      if (!admin) {
+        return res.status(404).json({
+          success: false,
+          message: "Admin not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: admin,
+      });
+    } catch (error) {
+      console.error("Error fetching admin:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching admin",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = adminController;

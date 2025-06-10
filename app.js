@@ -41,12 +41,14 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import routes
 const adminRoutes = require("./src/routes/adminRoutes");
+const messageRoutes = require("./src/routes/messageRoutes");
 
 // Use routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/mix", mixRoutes);
 app.use("/api/event", eventRoutes);
 app.use("/api/trending", trendingRoutes);
+app.use("/api/message", messageRoutes);
 
 // 404 Route handler
 app.use((req, res) => {
