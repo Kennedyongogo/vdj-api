@@ -4,6 +4,8 @@ const Event = require("./event");
 const Trending = require("./trending");
 const TrendingLike = require("./trendingLike");
 const TrendingComment = require("./trendingComment");
+const Archive = require("./archive");
+const Service = require("./service");
 
 // Define associations
 const defineAssociations = () => {
@@ -29,6 +31,30 @@ const defineAssociations = () => {
   Admin.hasMany(Event, {
     foreignKey: "djId",
     as: "events",
+  });
+
+  // Archive belongs to Admin (DJ)
+  Archive.belongsTo(Admin, {
+    foreignKey: "djId",
+    as: "admin",
+  });
+
+  // Admin has many Archives
+  Admin.hasMany(Archive, {
+    foreignKey: "djId",
+    as: "archives",
+  });
+
+  // Service belongs to Admin (DJ)
+  Service.belongsTo(Admin, {
+    foreignKey: "djId",
+    as: "admin",
+  });
+
+  // Admin has many Services
+  Admin.hasMany(Service, {
+    foreignKey: "djId",
+    as: "services",
   });
 
   // Trending associations

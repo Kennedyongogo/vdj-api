@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter to only allow audio and video files
+// File filter to allow audio, video, and image files
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     "audio/mpeg",
@@ -24,13 +24,19 @@ const fileFilter = (req, file, cb) => {
     "audio/wav",
     "video/mp4",
     "video/quicktime",
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(
-      new Error("Invalid file type. Only audio and video files are allowed."),
+      new Error(
+        "Invalid file type. Only audio, video, and image files are allowed."
+      ),
       false
     );
   }
@@ -41,8 +47,23 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB limit
+    fileSize: 2 * 1024 * 1024 * 1024, // 2GB limit
   },
 });
 
-module.exports = upload;
+// Create specific upload middleware for archive
+const archiveUpload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 2 * 1024 * 1024 * 1024, // 2GB limit
+  },
+}).fields([
+  { name: "videos", maxCount: 5 },
+  { name: "images", maxCount: 10 },
+]);
+
+module.exports = {
+  upload,
+  archiveUpload,
+};

@@ -5,7 +5,9 @@ const fs = require("fs");
 const mixRoutes = require("./src/routes/mixRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
 const trendingRoutes = require("./src/routes/trendingRoutes");
+const archiveRoutes = require("./src/routes/archiveRoutes");
 const defineAssociations = require("./src/models/associations");
+const serviceRoutes = require("./src/routes/serviceRoutes");
 const app = express();
 
 // Initialize model associations
@@ -49,6 +51,8 @@ app.use("/api/mix", mixRoutes);
 app.use("/api/event", eventRoutes);
 app.use("/api/trending", trendingRoutes);
 app.use("/api/message", messageRoutes);
+app.use("/api/archive", archiveRoutes);
+app.use("/api/service", serviceRoutes);
 
 // 404 Route handler
 app.use((req, res) => {

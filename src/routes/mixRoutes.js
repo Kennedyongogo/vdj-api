@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mixController = require("../controllers/mixController");
 const { adminMiddleware } = require("../middleware/auth");
-const upload = require("../middleware/uploadMiddleware");
+const { upload } = require("../middleware/uploadMiddleware");
 
 // Public routes
 router.get("/", mixController.getAllMixes); // Get all mixes
@@ -19,7 +19,7 @@ router.post(
   upload.single("file"),
   mixController.createMix
 ); // Create new mix
-router.put("/:id", adminMiddleware, mixController.updateMix); // Update mix
+router.put("/:id", adminMiddleware, mixController.updateMix);// Update mix
 router.delete("/:id", adminMiddleware, mixController.deleteMix); // Delete mix
 
 module.exports = router;
